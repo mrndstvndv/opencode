@@ -1310,6 +1310,10 @@ export type KeybindsConfig = {
    */
   session_parent?: string
   /**
+   * Toggle Zen Mode
+   */
+  zen_mode_toggle?: string
+  /**
    * Suspend terminal
    */
   terminal_suspend?: string

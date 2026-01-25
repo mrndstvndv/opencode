@@ -10,6 +10,8 @@ import { useKeybind } from "../../context/keybind"
 import { Installation } from "@/installation"
 import { useTerminalDimensions } from "@opentui/solid"
 
+import { getTokenUsage } from "../../util/session"
+
 const Title = (props: { session: Accessor<Session> }) => {
   const { theme } = useTheme()
   return (
@@ -48,14 +50,12 @@ export function Header() {
   })
 
   const context = createMemo(() => {
-    const last = messages().findLast((x) => x.role === "assistant" && x.tokens.output > 0) as AssistantMessage
-    if (!last) return
-    const total =
-      last.tokens.input + last.tokens.output + last.tokens.reasoning + last.tokens.cache.read + last.tokens.cache.write
-    const model = sync.data.provider.find((x) => x.id === last.providerID)?.models[last.modelID]
-    let result = total.toLocaleString()
-    if (model?.limit.context) {
-      result += "  " + Math.round((total / model.limit.context) * 100) + "%"
+    const usage = getTokenUsage(messages(), sync)
+    if (!usage) return undefined
+
+    let result = usage.formatted
+    if (usage.percentage !== undefined) {
+      result += "  " + usage.percentage + "%"
     }
     return result
   })

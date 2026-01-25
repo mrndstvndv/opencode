@@ -95,6 +95,7 @@ const context = createContext<{
   showTimestamps: () => boolean
   showDetails: () => boolean
   diffWrapMode: () => "word" | "none"
+  zenMode: () => boolean
   sync: ReturnType<typeof useSync>
 }>()
 
@@ -147,6 +148,7 @@ export function Session() {
   const [showScrollbar, setShowScrollbar] = kv.signal("scrollbar_visible", false)
   const [diffWrapMode, setDiffWrapMode] = createSignal<"word" | "none">("word")
   const [animationsEnabled, setAnimationsEnabled] = kv.signal("animations_enabled", true)
+  const [zenMode, setZenMode] = kv.signal("zen_mode", false)
 
   const wide = createMemo(() => dimensions().width > 120)
   const sidebarVisible = createMemo(() => {
@@ -486,6 +488,19 @@ export function Session() {
           sessionID: route.sessionID,
           messageID: message.id,
         })
+      },
+    },
+    {
+      title: zenMode() ? "Exit Zen Mode" : "Enter Zen Mode",
+      value: "session.zen_mode.toggle",
+      keybind: "zen_mode_toggle",
+      category: "Session",
+      slash: {
+        name: "zen",
+      },
+      onSelect: (dialog) => {
+        setZenMode((prev) => !prev)
+        dialog.clear()
       },
     },
     {
@@ -945,13 +960,21 @@ export function Session() {
         showTimestamps,
         showDetails,
         diffWrapMode,
+        zenMode,
         sync,
       }}
     >
       <box flexDirection="row">
-        <box flexGrow={1} paddingBottom={1} paddingTop={1} paddingLeft={2} paddingRight={2} gap={1}>
+        <box
+          flexGrow={1}
+          paddingBottom={zenMode() ? 0 : 1}
+          paddingTop={zenMode() ? 0 : 1}
+          paddingLeft={zenMode() ? 0 : 2}
+          paddingRight={zenMode() ? 0 : 2}
+          gap={zenMode() ? 0 : 1}
+        >
           <Show when={session()}>
-            <Show when={!sidebarVisible() || !wide()}>
+            <Show when={!zenMode() && (!sidebarVisible() || !wide())}>
               <Header />
             </Show>
             <scrollbox
