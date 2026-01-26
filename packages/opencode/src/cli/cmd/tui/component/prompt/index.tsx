@@ -81,6 +81,23 @@ export function Prompt(props: PromptProps) {
     return getTokenUsage(messages, sync)
   })
 
+  const [store, setStore] = createStore<{
+    prompt: PromptInfo
+    mode: "normal" | "shell"
+    extmarkToPartIndex: Map<number, number>
+    interrupt: number
+    placeholder: number
+  }>({
+    placeholder: Math.floor(Math.random() * PLACEHOLDERS.length),
+    prompt: {
+      input: "",
+      parts: [],
+    },
+    mode: "normal",
+    extmarkToPartIndex: new Map(),
+    interrupt: 0,
+  })
+
   const dimensions = useTerminalDimensions()
 
   const displayModel = createMemo(() => {
@@ -153,23 +170,6 @@ export function Prompt(props: PromptProps) {
     const messages = sync.data.message[props.sessionID]
     if (!messages) return undefined
     return messages.findLast((m) => m.role === "user")
-  })
-
-  const [store, setStore] = createStore<{
-    prompt: PromptInfo
-    mode: "normal" | "shell"
-    extmarkToPartIndex: Map<number, number>
-    interrupt: number
-    placeholder: number
-  }>({
-    placeholder: Math.floor(Math.random() * PLACEHOLDERS.length),
-    prompt: {
-      input: "",
-      parts: [],
-    },
-    mode: "normal",
-    extmarkToPartIndex: new Map(),
-    interrupt: 0,
   })
 
   // Initialize agent/model/variant from last user message when session changes
