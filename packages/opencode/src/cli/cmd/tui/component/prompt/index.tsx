@@ -15,7 +15,7 @@ import { usePromptStash } from "./stash"
 import { DialogStash } from "../dialog-stash"
 import { type AutocompleteRef, Autocomplete } from "./autocomplete"
 import { useCommandDialog } from "../dialog-command"
-import { useRenderer } from "@opentui/solid"
+import { useRenderer, useTerminalDimensions } from "@opentui/solid"
 import { Editor } from "@tui/util/editor"
 import { useExit } from "../../context/exit"
 import { Clipboard } from "../../util/clipboard"
@@ -79,6 +79,41 @@ export function Prompt(props: PromptProps) {
   const context = createMemo(() => {
     const messages = sync.data.message[props.sessionID ?? ""] ?? []
     return getTokenUsage(messages, sync)
+  })
+
+  const dimensions = useTerminalDimensions()
+
+  const displayModel = createMemo(() => {
+    const full = local.model.parsed().model
+    if (status().type === "idle") return full
+
+    const width = dimensions().width
+    const padding = zenMode() ? 2 : 4
+
+    // Calculate static width on the left
+    let leftStatic = 0
+    if (status().type !== "idle") leftStatic += 2 // spinner + gap
+    const ctxUsage = context()
+    if (ctxUsage?.percentage !== undefined) {
+      leftStatic += ctxUsage.percentage.toString().length + 1 + 1 // percentage + % + gap
+    }
+
+    const agentName = store.mode === "shell" ? "Shell" : Locale.titlecase(local.agent.current().name)
+    leftStatic += agentName.length + 1 // agent + gap
+    leftStatic += 3 // " · "
+
+    // Calculate width on the right (only in zen mode)
+    let rightSide = 0
+    if (zenMode() && status().type !== "idle") {
+      rightSide = store.interrupt > 0 ? 22 : 13 // "esc again to interrupt" vs "esc interrupt"
+      rightSide += 1 // padding between left and right boxes
+    }
+
+    const available = width - padding - leftStatic - rightSide
+
+    if (full.length <= available) return full
+    if (available < 5) return full.slice(0, 3) + "…" // Absolute minimum
+    return full.slice(0, available - 1) + "…"
   })
 
   function promptModelWarning() {
@@ -796,14 +831,7 @@ export function Prompt(props: PromptProps) {
                   <text fg={highlight()}>
                     {store.mode === "shell" ? "Shell" : Locale.titlecase(local.agent.current().name)}
                     <Show when={store.mode !== "shell"}>
-                      <span style={{ fg: keybind.leader ? theme.textMuted : theme.text }}>
-                        {" "}
-                        ·{" "}
-                        {status().type !== "idle"
-                          ? local.model.parsed().model.slice(0, 20) +
-                            (local.model.parsed().model.length > 20 ? "…" : "")
-                          : local.model.parsed().model}
-                      </span>
+                      <span style={{ fg: keybind.leader ? theme.textMuted : theme.text }}> · {displayModel()}</span>
                       <Show when={showVariant()}>
                         <span style={{ fg: theme.textMuted }}> · </span>
                         <span style={{ fg: theme.warning, bold: !keybind.leader }}>
@@ -1010,7 +1038,7 @@ export function Prompt(props: PromptProps) {
                 <Show when={store.mode === "normal"}>
                   <box flexDirection="row" gap={1}>
                     <text flexShrink={0} fg={keybind.leader ? theme.textMuted : theme.text}>
-                      {local.model.parsed().model}
+                      {displayModel()}
                     </text>
                     <text fg={theme.textMuted}>{local.model.parsed().provider}</text>
                     <Show when={showVariant()}>
