@@ -367,7 +367,7 @@ export function createColors(options: KnightRiderOptions = {}): ColorGenerator {
   return createKnightRiderTrail(trailOptions)
 }
 
-export const CIRCLE_SPINNER = {
-  frames: ["○", "◔", "◑", "◕", "●"],
-  interval: 100,
+export const BRAILLE_SPINNER = {
+  frames: ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
+  interval: 80,
 }

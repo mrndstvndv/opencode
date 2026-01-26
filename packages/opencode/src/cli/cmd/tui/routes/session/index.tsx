@@ -1000,6 +1000,7 @@ export function Session() {
                   <Switch>
                     <Match when={message.id === revert()?.messageID}>
                       {(function () {
+                        const ctx = use()
                         const command = useCommandDialog()
                         const [hover, setHover] = createSignal(false)
                         const dialog = useDialog()
@@ -1027,9 +1028,10 @@ export function Session() {
                             borderColor={theme.backgroundPanel}
                           >
                             <box
-                              paddingTop={1}
-                              paddingBottom={1}
-                              paddingLeft={2}
+                              paddingTop={ctx.zenMode() ? 0 : 1}
+                              paddingBottom={ctx.zenMode() ? 0 : 1}
+                              paddingLeft={ctx.zenMode() ? 1 : 2}
+                              paddingRight={ctx.zenMode() ? 1 : 0}
                               backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
                             >
                               <text fg={theme.textMuted}>{revert()!.reverted.length} message reverted</text>
@@ -1193,7 +1195,7 @@ function UserMessage(props: {
             onMouseUp={props.onMouseUp}
             paddingTop={ctx.zenMode() ? 0 : 1}
             paddingBottom={ctx.zenMode() ? 0 : 1}
-            paddingLeft={ctx.zenMode() ? 0 : 2}
+            paddingLeft={ctx.zenMode() ? 1 : 2}
             paddingRight={ctx.zenMode() ? 1 : 0}
             backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
             flexShrink={0}
@@ -1297,7 +1299,7 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
           border={["left"]}
           paddingTop={ctx.zenMode() ? 0 : 1}
           paddingBottom={ctx.zenMode() ? 0 : 1}
-          paddingLeft={ctx.zenMode() ? 0 : 2}
+          paddingLeft={ctx.zenMode() ? 1 : 2}
           paddingRight={ctx.zenMode() ? 1 : 0}
           marginTop={1}
           backgroundColor={theme.backgroundPanel}
@@ -1309,7 +1311,7 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
       </Show>
       <Switch>
         <Match when={props.last || final() || props.message.error?.name === "MessageAbortedError"}>
-          <box paddingLeft={ctx.zenMode() ? 1 : 3} paddingRight={ctx.zenMode() ? 1 : 0}>
+          <box paddingLeft={ctx.zenMode() ? 2 : 3} paddingRight={ctx.zenMode() ? 1 : 0}>
             <text marginTop={1}>
               <span
                 style={{
@@ -1355,7 +1357,7 @@ function ReasoningPart(props: { last: boolean; part: ReasoningPart; message: Ass
     <Show when={content() && ctx.showThinking()}>
       <box
         id={"text-" + props.part.id}
-        paddingLeft={ctx.zenMode() ? 1 : 2}
+        paddingLeft={2}
         paddingRight={ctx.zenMode() ? 1 : 0}
         marginTop={1}
         flexDirection="column"
@@ -1384,7 +1386,7 @@ function TextPart(props: { last: boolean; part: TextPart; message: AssistantMess
     <Show when={props.part.text.trim()}>
       <box
         id={"text-" + props.part.id}
-        paddingLeft={ctx.zenMode() ? 1 : 3}
+        paddingLeft={ctx.zenMode() ? 2 : 3}
         paddingRight={ctx.zenMode() ? 1 : 0}
         marginTop={1}
         flexShrink={0}
@@ -1510,8 +1512,9 @@ function GenericTool(props: ToolProps<any>) {
 
 function ToolTitle(props: { fallback: string; when: any; icon: string; children: JSX.Element }) {
   const { theme } = useTheme()
+  const ctx = use()
   return (
-    <text paddingLeft={3} fg={props.when ? theme.textMuted : theme.text}>
+    <text paddingLeft={ctx.zenMode() ? 2 : 3} fg={props.when ? theme.textMuted : theme.text}>
       <Show fallback={<>~ {props.fallback}</>} when={props.when}>
         <span style={{ bold: true }}>{props.icon}</span> {props.children}
       </Show>
@@ -1556,7 +1559,7 @@ function InlineTool(props: {
   return (
     <box
       marginTop={margin()}
-      paddingLeft={3}
+      paddingLeft={ctx.zenMode() ? 2 : 3}
       renderBefore={function () {
         const el = this as BoxRenderable
         const parent = el.parent
@@ -1580,7 +1583,11 @@ function InlineTool(props: {
         }
       }}
     >
-      <text paddingLeft={3} fg={fg()} attributes={denied() ? TextAttributes.STRIKETHROUGH : undefined}>
+      <text
+        paddingLeft={ctx.zenMode() ? 0 : 3}
+        fg={fg()}
+        attributes={denied() ? TextAttributes.STRIKETHROUGH : undefined}
+      >
         <Show fallback={<>~ {props.pending}</>} when={props.complete}>
           <span style={{ fg: props.iconColor }}>{props.icon}</span> {props.children}
         </Show>
@@ -1602,7 +1609,7 @@ function BlockTool(props: { title: string; children: JSX.Element; onClick?: () =
       border={["left"]}
       paddingTop={use().zenMode() ? 0 : 1}
       paddingBottom={use().zenMode() ? 0 : 1}
-      paddingLeft={use().zenMode() ? 0 : 2}
+      paddingLeft={use().zenMode() ? 1 : 2}
       paddingRight={use().zenMode() ? 1 : 0}
       marginTop={1}
       gap={1}
@@ -1616,7 +1623,7 @@ function BlockTool(props: { title: string; children: JSX.Element; onClick?: () =
         props.onClick?.()
       }}
     >
-      <text paddingLeft={3} fg={theme.textMuted}>
+      <text paddingLeft={use().zenMode() ? 1 : 3} fg={theme.textMuted}>
         {props.title}
       </text>
       {props.children}

@@ -24,7 +24,7 @@ import { TuiEvent } from "../../event"
 import { iife } from "@/util/iife"
 import { Locale } from "@/util/locale"
 import { formatDuration } from "@/util/format"
-import { createColors, createFrames, CIRCLE_SPINNER } from "../../ui/spinner.ts"
+import { createColors, createFrames, BRAILLE_SPINNER } from "../../ui/spinner.ts"
 import { useDialog } from "@tui/ui/dialog"
 import { DialogProvider as DialogProviderConnect } from "../dialog-provider"
 import { DialogAlert } from "../../ui/dialog-alert"
@@ -788,7 +788,7 @@ export function Prompt(props: PromptProps) {
               <box flexDirection="row" gap={1} justifyContent="space-between">
                 <box flexDirection="row" gap={1}>
                   <Show when={status().type !== "idle"}>
-                    <spinner color={highlight} frames={CIRCLE_SPINNER.frames} interval={CIRCLE_SPINNER.interval} />
+                    <spinner color={highlight} frames={BRAILLE_SPINNER.frames} interval={BRAILLE_SPINNER.interval} />
                   </Show>
                   <Show when={context()?.percentage !== undefined}>
                     <text fg={theme.textMuted}>{context()!.percentage}%</text>
