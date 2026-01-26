@@ -1191,15 +1191,22 @@ function UserMessage(props: {
               setHover(false)
             }}
             onMouseUp={props.onMouseUp}
-            paddingTop={1}
-            paddingBottom={1}
-            paddingLeft={2}
+            paddingTop={ctx.zenMode() ? 0 : 1}
+            paddingBottom={ctx.zenMode() ? 0 : 1}
+            paddingLeft={ctx.zenMode() ? 0 : 2}
+            paddingRight={ctx.zenMode() ? 1 : 0}
             backgroundColor={hover() ? theme.backgroundElement : theme.backgroundPanel}
             flexShrink={0}
           >
             <text fg={theme.text}>{text()?.text}</text>
             <Show when={files().length}>
-              <box flexDirection="row" paddingBottom={metadataVisible() ? 1 : 0} paddingTop={1} gap={1} flexWrap="wrap">
+              <box
+                flexDirection="row"
+                paddingBottom={metadataVisible() ? (ctx.zenMode() ? 0 : 1) : 0}
+                paddingTop={ctx.zenMode() ? 0 : 1}
+                gap={1}
+                flexWrap="wrap"
+              >
                 <For each={files()}>
                   {(file) => {
                     const bg = createMemo(() => {
@@ -1250,6 +1257,7 @@ function UserMessage(props: {
 }
 
 function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; last: boolean }) {
+  const ctx = use()
   const local = useLocal()
   const { theme } = useTheme()
   const sync = useSync()
@@ -1287,9 +1295,10 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
       <Show when={props.message.error && props.message.error.name !== "MessageAbortedError"}>
         <box
           border={["left"]}
-          paddingTop={1}
-          paddingBottom={1}
-          paddingLeft={2}
+          paddingTop={ctx.zenMode() ? 0 : 1}
+          paddingBottom={ctx.zenMode() ? 0 : 1}
+          paddingLeft={ctx.zenMode() ? 0 : 2}
+          paddingRight={ctx.zenMode() ? 1 : 0}
           marginTop={1}
           backgroundColor={theme.backgroundPanel}
           customBorderChars={SplitBorder.customBorderChars}
@@ -1300,7 +1309,7 @@ function AssistantMessage(props: { message: AssistantMessage; parts: Part[]; las
       </Show>
       <Switch>
         <Match when={props.last || final() || props.message.error?.name === "MessageAbortedError"}>
-          <box paddingLeft={3}>
+          <box paddingLeft={ctx.zenMode() ? 1 : 3} paddingRight={ctx.zenMode() ? 1 : 0}>
             <text marginTop={1}>
               <span
                 style={{
@@ -1346,10 +1355,11 @@ function ReasoningPart(props: { last: boolean; part: ReasoningPart; message: Ass
     <Show when={content() && ctx.showThinking()}>
       <box
         id={"text-" + props.part.id}
-        paddingLeft={2}
+        paddingLeft={ctx.zenMode() ? 1 : 2}
+        paddingRight={ctx.zenMode() ? 1 : 0}
         marginTop={1}
         flexDirection="column"
-        border={["left"]}
+        border={ctx.zenMode() ? [] : ["left"]}
         customBorderChars={SplitBorder.customBorderChars}
         borderColor={theme.backgroundElement}
       >
@@ -1372,7 +1382,13 @@ function TextPart(props: { last: boolean; part: TextPart; message: AssistantMess
   const { theme, syntax } = useTheme()
   return (
     <Show when={props.part.text.trim()}>
-      <box id={"text-" + props.part.id} paddingLeft={3} marginTop={1} flexShrink={0}>
+      <box
+        id={"text-" + props.part.id}
+        paddingLeft={ctx.zenMode() ? 1 : 3}
+        paddingRight={ctx.zenMode() ? 1 : 0}
+        marginTop={1}
+        flexShrink={0}
+      >
         <code
           filetype="markdown"
           drawUnstyledText={false}
@@ -1584,9 +1600,10 @@ function BlockTool(props: { title: string; children: JSX.Element; onClick?: () =
   return (
     <box
       border={["left"]}
-      paddingTop={1}
-      paddingBottom={1}
-      paddingLeft={2}
+      paddingTop={use().zenMode() ? 0 : 1}
+      paddingBottom={use().zenMode() ? 0 : 1}
+      paddingLeft={use().zenMode() ? 0 : 2}
+      paddingRight={use().zenMode() ? 1 : 0}
       marginTop={1}
       gap={1}
       backgroundColor={hover() ? theme.backgroundMenu : theme.backgroundPanel}
