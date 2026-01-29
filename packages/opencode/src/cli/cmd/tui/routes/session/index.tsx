@@ -277,7 +277,8 @@ export function Session() {
 
   function toBottom() {
     setTimeout(() => {
-      if (scroll) scroll.scrollTo(scroll.scrollHeight)
+      if (!scroll || scroll.isDestroyed) return
+      scroll.scrollTo(scroll.scrollHeight)
     }, 50)
   }
 
@@ -1382,7 +1383,12 @@ function TextPart(props: { last: boolean; part: TextPart; message: AssistantMess
       >
         <Switch>
           <Match when={Flag.OPENCODE_EXPERIMENTAL_MARKDOWN}>
-            <markdown syntaxStyle={syntax()} content={props.part.text.trim()} conceal={ctx.conceal()} />
+            <markdown
+              syntaxStyle={syntax()}
+              streaming={true}
+              content={props.part.text.trim()}
+              conceal={ctx.conceal()}
+            />
           </Match>
           <Match when={!Flag.OPENCODE_EXPERIMENTAL_MARKDOWN}>
             <code
