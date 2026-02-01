@@ -32,6 +32,7 @@ import { useToast } from "../../ui/toast"
 import { useKV } from "../../context/kv"
 import { useTextareaKeybindings } from "../textarea-keybindings"
 import { getTokenUsage } from "../../util/session"
+import { DialogSkill } from "../dialog-skill"
 
 export type PromptProps = {
   sessionID?: string
@@ -355,6 +356,28 @@ export function Prompt(props: PromptProps) {
           })
           restoreExtmarksFromParts(updatedNonTextParts)
           input.cursorOffset = Bun.stringWidth(content)
+        },
+      },
+      {
+        title: "Skills",
+        value: "prompt.skills",
+        category: "Prompt",
+        slash: {
+          name: "skills",
+        },
+        onSelect: () => {
+          dialog.replace(() => (
+            <DialogSkill
+              onSelect={(skill) => {
+                input.setText(`/${skill} `)
+                setStore("prompt", {
+                  input: `/${skill} `,
+                  parts: [],
+                })
+                input.gotoBufferEnd()
+              }}
+            />
+          ))
         },
       },
     ]
