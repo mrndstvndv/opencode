@@ -1301,6 +1301,10 @@ export type KeybindsConfig = {
    */
   zen_mode_toggle?: string
   /**
+   * View file changes
+   */
+  changes_view?: string
+  /**
    * Suspend terminal
    */
   terminal_suspend?: string

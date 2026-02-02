@@ -1,4 +1,5 @@
 import { useSync } from "@tui/context/sync"
+import { useRoute } from "@tui/context/route"
 import { createMemo, For, Show, Switch, Match } from "solid-js"
 import { createStore } from "solid-js/store"
 import { useTheme } from "../../context/theme"
@@ -14,6 +15,7 @@ import { TodoItem } from "../../component/todo-item"
 
 export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
   const sync = useSync()
+  const route = useRoute()
   const { theme } = useTheme()
   const session = createMemo(() => sync.session.get(props.sessionID)!)
   const diff = createMemo(() => sync.data.session_diff[props.sessionID] ?? [])
@@ -226,7 +228,11 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
                 <box
                   flexDirection="row"
                   gap={1}
-                  onMouseDown={() => diff().length > 2 && setExpanded("diff", !expanded.diff)}
+                  onMouseDown={() => {
+                    if (diff().length > 2) {
+                      setExpanded("diff", !expanded.diff)
+                    }
+                  }}
                 >
                   <Show when={diff().length > 2}>
                     <text fg={theme.text}>{expanded.diff ? "▼" : "▶"}</text>
@@ -234,6 +240,18 @@ export function Sidebar(props: { sessionID: string; overlay?: boolean }) {
                   <text fg={theme.text}>
                     <b>Modified Files</b>
                   </text>
+                </box>
+                <box
+                  flexDirection="row"
+                  gap={1}
+                  onMouseDown={() => {
+                    route.navigate({
+                      type: "changes",
+                      sessionID: props.sessionID,
+                    })
+                  }}
+                >
+                  <text fg={theme.textMuted}>Click to view all changes</text>
                 </box>
                 <Show when={diff().length <= 2 || expanded.diff}>
                   <For each={diff() || []}>

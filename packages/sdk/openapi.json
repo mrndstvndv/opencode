@@ -8865,6 +8865,16 @@
             "default": "<leader>up",
             "type": "string"
           },
+          "zen_mode_toggle": {
+            "description": "Toggle Zen Mode",
+            "default": "alt+z",
+            "type": "string"
+          },
+          "changes_view": {
+            "description": "View file changes",
+            "default": "<leader>d",
+            "type": "string"
+          },
           "terminal_suspend": {
             "description": "Suspend terminal",
             "default": "ctrl+z",
