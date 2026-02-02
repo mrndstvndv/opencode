@@ -1,7 +1,7 @@
 import { Show, createMemo } from "solid-js"
 import { useTheme } from "@tui/context/theme"
 import { useKV } from "@tui/context/kv"
-import type { Snapshot } from "@/snapshot"
+import { Snapshot } from "@/snapshot"
 import path from "path"
 import { createTwoFilesPatch } from "diff"
 
@@ -44,24 +44,29 @@ function detectFileType(filePath: string): string {
   return languageMap[ext] ?? "text"
 }
 
-function generateDiffContent(diff: Snapshot.FileDiff): string {
-  const isBinary = diff.additions === 0 && diff.deletions === 0
-  const isDeleted = !isBinary && diff.after === ""
-  const isAdded = !isBinary && diff.before === ""
+function generateDiffContent(diff: Snapshot.FileDiff): { content: string; error?: string } {
+  try {
+    const isBinary = Snapshot.isBinaryFile(diff)
+    const isDeleted = !isBinary && diff.after === ""
+    const isAdded = !isBinary && diff.before === ""
 
-  if (isBinary) {
-    return ""
+    if (isBinary) {
+      return { content: "" }
+    }
+
+    if (isDeleted) {
+      return { content: createTwoFilesPatch(diff.file, diff.file, diff.before, "") }
+    }
+
+    if (isAdded) {
+      return { content: createTwoFilesPatch(diff.file, diff.file, "", diff.after) }
+    }
+
+    return { content: createTwoFilesPatch(diff.file, diff.file, diff.before, diff.after) }
+  } catch (error) {
+    console.error("Failed to generate diff:", error)
+    return { content: "", error: `Error generating diff for ${diff.file}` }
   }
-
-  if (isDeleted) {
-    return createTwoFilesPatch(diff.file, diff.file, diff.before, "")
-  }
-
-  if (isAdded) {
-    return createTwoFilesPatch(diff.file, diff.file, "", diff.after)
-  }
-
-  return createTwoFilesPatch(diff.file, diff.file, diff.before, diff.after)
 }
 
 export function DiffViewer(props: DiffViewerProps) {
@@ -70,11 +75,13 @@ export function DiffViewer(props: DiffViewerProps) {
 
   const fileType = createMemo(() => detectFileType(props.diff.file))
 
-  const isBinary = () => props.diff.additions === 0 && props.diff.deletions === 0
+  const isBinary = () => Snapshot.isBinaryFile(props.diff)
   const isDeleted = () => !isBinary() && props.diff.after === ""
   const isAdded = () => !isBinary() && props.diff.before === ""
 
-  const diffContent = createMemo(() => generateDiffContent(props.diff))
+  const diffResult = createMemo(() => generateDiffContent(props.diff))
+  const diffContent = () => diffResult().content
+  const diffError = () => diffResult().error
 
   const headerStats = () => {
     const parts: string[] = []
@@ -116,10 +123,10 @@ export function DiffViewer(props: DiffViewerProps) {
       </box>
 
       <Show
-        when={!isBinary()}
+        when={!isBinary() && !diffError()}
         fallback={
           <box flexGrow={1} justifyContent="center" alignItems="center">
-            <text fg={theme.textMuted}>Binary file - diff not available</text>
+            <text fg={theme.textMuted}>{diffError() || "Binary file - diff not available"}</text>
           </box>
         }
       >

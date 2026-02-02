@@ -189,11 +189,17 @@ export namespace Snapshot {
       additions: z.number(),
       deletions: z.number(),
       status: z.enum(["added", "deleted", "modified"]).optional(),
+      isBinary: z.boolean().optional(),
     })
     .meta({
       ref: "FileDiff",
     })
   export type FileDiff = z.infer<typeof FileDiff>
+
+  export function isBinaryFile(diff: FileDiff): boolean {
+    return diff.isBinary ?? (diff.additions === 0 && diff.deletions === 0 && diff.before === "" && diff.after === "")
+  }
+
   export async function diffFull(from: string, to: string): Promise<FileDiff[]> {
     const git = gitdir()
     const result: FileDiff[] = []
@@ -221,21 +227,21 @@ export namespace Snapshot {
       .lines()) {
       if (!line) continue
       const [additions, deletions, file] = line.split("\t")
-      const isBinaryFile = additions === "-" && deletions === "-"
-      const before = isBinaryFile
+      const fileIsBinary = additions === "-" && deletions === "-"
+      const before = fileIsBinary
         ? ""
         : await $`git -c core.autocrlf=false --git-dir ${git} --work-tree ${Instance.worktree} show ${from}:${file}`
             .quiet()
             .nothrow()
             .text()
-      const after = isBinaryFile
+      const after = fileIsBinary
         ? ""
         : await $`git -c core.autocrlf=false --git-dir ${git} --work-tree ${Instance.worktree} show ${to}:${file}`
             .quiet()
             .nothrow()
             .text()
-      const added = isBinaryFile ? 0 : parseInt(additions)
-      const deleted = isBinaryFile ? 0 : parseInt(deletions)
+      const added = fileIsBinary ? 0 : parseInt(additions)
+      const deleted = fileIsBinary ? 0 : parseInt(deletions)
       result.push({
         file,
         before,
@@ -243,6 +249,7 @@ export namespace Snapshot {
         additions: Number.isFinite(added) ? added : 0,
         deletions: Number.isFinite(deleted) ? deleted : 0,
         status: status.get(file) ?? "modified",
+        isBinary: fileIsBinary,
       })
     }
     return result

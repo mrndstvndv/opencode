@@ -1,4 +1,4 @@
-import { createSignal, createMemo, createEffect, Show, batch } from "solid-js"
+import { createSignal, createMemo, createEffect, Show } from "solid-js"
 import { useRoute, useRouteData } from "@tui/context/route"
 import { useSync } from "@tui/context/sync"
 import { useTheme } from "@tui/context/theme"
@@ -7,6 +7,8 @@ import { useKV } from "@tui/context/kv"
 import { FileTree } from "./file-tree"
 import { DiffViewer } from "./diff-viewer"
 import type { Snapshot } from "@/snapshot"
+
+const SIDEBAR_WIDTH = 35
 
 export function Changes() {
   const route = useRoute()
@@ -70,13 +72,15 @@ export function Changes() {
   })
 
   createEffect(() => {
+    // Only check after data has finished loading to avoid race condition
+    if (sync.data.status === "loading") return
     const session = sync.session.get(sessionID())
     if (!session) {
       route.navigate({ type: "home" })
     }
   })
 
-  const sidebarWidth = createMemo(() => (showSidebar() ? 35 : 0))
+  const sidebarWidth = createMemo(() => (showSidebar() ? SIDEBAR_WIDTH : 0))
   const contentWidth = createMemo(() => dimensions().width - sidebarWidth())
 
   return (

@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js"
 import { useTheme } from "@tui/context/theme"
-import type { Snapshot } from "@/snapshot"
+import { Snapshot } from "@/snapshot"
 import path from "path"
 
 interface FileTreeProps {
@@ -106,7 +106,7 @@ function TreeNodeComponent(props: {
 
   const isSelected = () => props.node.index === props.selectedIndex()
   const file = props.node.file!
-  const isBinary = file.additions === 0 && file.deletions === 0
+  const isBinary = Snapshot.isBinaryFile(file)
   const isDeleted = !isBinary && file.after === ""
   const isAdded = !isBinary && file.before === ""
 
@@ -173,6 +173,7 @@ export function FileTree(props: FileTreeProps) {
         </box>
         <box paddingTop={1}>
           <text fg={theme.textMuted}>↑/↓ or j/k: navigate</text>
+          <text fg={theme.textMuted}>n/p: next/prev file</text>
           <text fg={theme.textMuted}>b/tab: toggle tree</text>
           <text fg={theme.textMuted}>v: toggle view</text>
           <text fg={theme.textMuted}>esc: back to session</text>
