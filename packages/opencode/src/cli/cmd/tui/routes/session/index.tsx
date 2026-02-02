@@ -245,6 +245,19 @@ export function Session() {
     }
   })
 
+  useKeyboard((evt) => {
+    if (keybind.match("changes_view", evt)) {
+      evt.preventDefault()
+      const diff = sync.data.session_diff[route.sessionID]
+      if (diff && diff.length > 0) {
+        navigate({
+          type: "changes",
+          sessionID: route.sessionID,
+        })
+      }
+    }
+  })
+
   // Helper: Find next visible message boundary in direction
   const findNextVisibleMessage = (direction: "next" | "prev"): string | null => {
     const children = scroll.getChildren()
@@ -350,6 +363,22 @@ export function Session() {
       },
       onSelect: (dialog) => {
         dialog.replace(() => <DialogSessionRename session={route.sessionID} />)
+      },
+    },
+    {
+      title: "View changes",
+      value: "changes.view",
+      category: "Session",
+      enabled: (sync.data.session_diff[route.sessionID] ?? []).length > 0,
+      slash: {
+        name: "changes",
+      },
+      onSelect: (dialog) => {
+        navigate({
+          type: "changes",
+          sessionID: route.sessionID,
+        })
+        dialog.clear()
       },
     },
     {

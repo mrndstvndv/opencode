@@ -833,6 +833,7 @@ export namespace Config {
       session_child_cycle_reverse: z.string().optional().default("<leader>left").describe("Previous child session"),
       session_parent: z.string().optional().default("<leader>up").describe("Go to parent session"),
       zen_mode_toggle: z.string().optional().default("alt+z").describe("Toggle Zen Mode"),
+      changes_view: z.string().optional().default("<leader>d").describe("View file changes"),
       terminal_suspend: z.string().optional().default("ctrl+z").describe("Suspend terminal"),
       terminal_title_toggle: z.string().optional().default("none").describe("Toggle terminal title"),
       tips_toggle: z.string().optional().default("<leader>h").describe("Toggle tips on home screen"),
