@@ -1657,20 +1657,21 @@ function BlockTool(props: {
   part?: ToolPart
   spinner?: boolean
 }) {
+  const ctx = use()
   const { theme } = useTheme()
   const renderer = useRenderer()
   const [hover, setHover] = createSignal(false)
   const error = createMemo(() => (props.part?.state.status === "error" ? props.part.state.error : undefined))
   return (
     <box
-      border={["left"]}
-      paddingTop={use().zenMode() ? 0 : 1}
-      paddingBottom={use().zenMode() ? 0 : 1}
-      paddingLeft={use().zenMode() ? 1 : 2}
-      paddingRight={use().zenMode() ? 1 : 0}
+      border={ctx.zenMode() ? [] : ["left"]}
+      paddingTop={ctx.zenMode() ? 0 : 1}
+      paddingBottom={ctx.zenMode() ? 0 : 1}
+      paddingLeft={ctx.zenMode() ? 2 : 2}
+      paddingRight={ctx.zenMode() ? 1 : 0}
       marginTop={1}
       gap={1}
-      backgroundColor={hover() ? theme.backgroundMenu : theme.backgroundPanel}
+      backgroundColor={ctx.zenMode() ? undefined : hover() ? theme.backgroundMenu : theme.backgroundPanel}
       customBorderChars={SplitBorder.customBorderChars}
       borderColor={theme.background}
       onMouseOver={() => props.onClick && setHover(true)}
@@ -1683,7 +1684,7 @@ function BlockTool(props: {
       <Show
         when={props.spinner}
         fallback={
-          <text paddingLeft={use().zenMode() ? 1 : 3} fg={theme.textMuted}>
+          <text paddingLeft={ctx.zenMode() ? 0 : 3} fg={theme.textMuted}>
             {props.title}
           </text>
         }
