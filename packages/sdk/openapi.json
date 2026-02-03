@@ -6091,6 +6091,9 @@
           "status": {
             "type": "string",
             "enum": ["added", "deleted", "modified"]
+          },
+          "isBinary": {
+            "type": "boolean"
           }
         },
         "required": ["file", "before", "after", "additions", "deletions"]

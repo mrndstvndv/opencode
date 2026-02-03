@@ -97,6 +97,7 @@ export type FileDiff = {
   additions: number
   deletions: number
   status?: "added" | "deleted" | "modified"
+  isBinary?: boolean
 }
 
 export type UserMessage = {
